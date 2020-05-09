@@ -5,7 +5,8 @@ new Vue({
   data: {
     search: "rock",
     albums: [],
-    page: 0,
+    albumsPage: [],
+    page: 1,
     type: "album",
     imgmusicAlbum: null,
     musicAlbum: null,
@@ -20,15 +21,38 @@ new Vue({
       album: false,
       music: false,
     },
+    // attributes for pagination
+    resultsPerPage: 10, // default
+    numberPages: 10,
   },
   created() {},
+  computed: {
+    pagination() {
+      return this.page + "/" + this.resultsPerPage;
+    },
+  },
   methods: {
+    previousPage() {
+      // reach the first page
+      if (this.page > 1) {
+        this.page--;
+        this.getSliceOfResults();
+      }
+    },
     nextPage() {
-      this.page++;
-      this.getAlbum();
+      // reach the last page
+      if (this.page < this.numberPages) {
+        this.page++;
+        this.getSliceOfResults();
+      }
+    },
+    getSliceOfResults() {
+      let last = this.page * this.resultsPerPage;
+      let initial = last - this.resultsPerPage;
+      this.albumsPage = this.albums.slice(initial, last);
     },
     sendForm() {
-      this.page = 0;
+      this.page = 1;
       this.ids = [];
       this.albums = [];
       this.getAlbum();
@@ -40,13 +64,13 @@ new Vue({
         .get(
           `search?term=${encodeURIComponent(
             this.search
-          )}&country=MX&media=music&entity=${this.type}&limit=200&offset=${
-            this.page * 200
-          }`
+          )}&country=MX&media=music&entity=${this.type}`
         )
         .then((resp) => {
           console.log("OK", resp);
-         let albums = resp.data.results.filter(function(album) {return album.trackCount > 3});
+          let albums = resp.data.results.filter(function (album) {
+            return album.trackCount > 3;
+          });
           albums.forEach((v, k) => {
             console.log("albums[k].artworkUrl100", v);
             v.artworkUrl100 = v.artworkUrl100.replace("100x100bb", "300x300bb");
@@ -59,6 +83,8 @@ new Vue({
             return Date.parse(b.releaseDate) - Date.parse(a.releaseDate);
           });
           this.processing.album = false;
+          //  first album page load
+          this.getSliceOfResults();
         })
         .catch((error) => {
           // console.log(error);
