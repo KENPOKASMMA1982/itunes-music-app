@@ -6,6 +6,7 @@ new Vue({
     search: "rock",
     albums: [],
     page: 0,
+    perPage: 8,
     type: "album",
     imgmusicAlbum: null,
     musicAlbum: null,
@@ -20,6 +21,7 @@ new Vue({
       album: false,
       music: false,
     },
+    
   },
   created() {},
   methods: {
@@ -38,30 +40,19 @@ new Vue({
       this.processing.album = true;
       axios
         .get(
-          `search?term=${encodeURIComponent(
-            this.search
-          )}&country=MX&media=music&entity=${this.type}&limit=200&offset=${
-            this.page * 200
-          }`
+          `search?term=${encodeURIComponent(this.search)}&country=MX&media=music&entity=${this.type}&limit=${this.perPage}&offset=${this.page * this.perPage}&sort=recent`
         )
         .then((resp) => {
-          console.log("OK", resp);
-         let albums = resp.data.results.filter(function(album) {return album.trackCount > 3});
+          let albums = resp.data.results;
           albums.forEach((v, k) => {
-            console.log("albums[k].artworkUrl100", v);
             v.artworkUrl100 = v.artworkUrl100.replace("100x100bb", "300x300bb");
-            if (this.ids.indexOf(v.collectionId) < 0) {
-              this.albums.push(v);
-              this.ids.push(v.collectionId);
-            }
-          });
-          this.albums.sort(function (a, b) {
-            return Date.parse(b.releaseDate) - Date.parse(a.releaseDate);
+            this.albums.push(v);
+            this.ids.push(v.collectionId);
           });
           this.processing.album = false;
         })
         .catch((error) => {
-          // console.log(error);
+          console.error(error);
           this.processing.album = false;
         });
     },
@@ -96,7 +87,7 @@ new Vue({
         })
         .catch((err) => {
           this.processing.music = false;
-          // console.log(err)
+          console.log(err)
         });
     },
     play(audio) {

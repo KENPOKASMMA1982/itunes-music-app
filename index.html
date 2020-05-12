@@ -23,6 +23,7 @@
   </head>
   <body class="colorBlack">
     <div id="app">
+      <!-- Encabezado para buscar -->
       <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
           <a class="navbar-brand" href="#">Navbar</a>
@@ -49,13 +50,21 @@
           </form>
         </nav>
       </header>
+
+      <!-- Pantalla donde se muestran todos los albums  -->
       <div
         class="container-fluid mt-2"
         id="cntAlbum"
         :class="{'d-none': activeMusic == true}"
       >
         <template v-if="albums">
-          <div class="row">
+          <!-- albums -->
+          <div class="row" 
+            v-infinite-scroll="nextPage" 
+            infinite-scroll-disabled="processing.album" 
+            infinite-scroll-distance="10"
+            infinite-scroll-immediate-check="false">
+
             <a
               href="#"
               @click="getMusic(album.collectionId)"
@@ -84,17 +93,12 @@
               </div>
             </a>
           </div>
-          <div class="text-center" v-if="albums.length>0">
-            <button class="btn btn-primary" @click="nextPage">See More</button>
-            <br />
-            <br />
-            <br />
-          </div>
+
         </template>
         <template v-else>
           <h2 class="text-center p-50">No album found ...</h2>
         </template>
-
+        <!-- Spinner buscar albums -->
         <template v-if="processing.album">
           <div class="loading text-center">
             <div class="d-flex justify-content-center">
@@ -110,6 +114,7 @@
           </div>
         </template>
       </div>
+      <!-- Pantalla para ver detalle de album -->
       <div
         class="container-fluid mt-2"
         id="cntMusic"
@@ -178,6 +183,7 @@
     ></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue-infinite-scroll@2.0.2/vue-infinite-scroll.js"></script>
     <script src="src/main.js"></script>
   </body>
 </html>
